@@ -1,0 +1,23 @@
+{
+    "urls" : [
+        "//nav[@id='toc']/div/div[starts-with(@class,'positioned contentTitle mediumTitle')]/div[@class='titleHeading']//a[@class='titleLink']",
+        "//nav[@id='toc']/div/div[starts-with(@class,'contentTitle barTitle')]/div[@class='titleHeading']//a[@class='titleLink']",
+        "//nav[@id='toc']/div[starts-with(@class,'contentTitle barTitle')]/div[@class='titleHeading']//a[@class='titleLink']"
+    ],
+    "title_prefix": "(//h1[@id='pageTitle']/span/a/span[1])",
+    "title_suffix": "(//h1[@id='pageTitle']/span/a/span[2])",
+    "html_title": "(//h1[@id='pageTitle']/span/a)",
+    "data" : "//div[@id='childContent']",
+    "section_title" : "//div[@id='childContent']/header//div[starts-with(@class, 'positioned contentTitle mediumTitle partTitle')]/h2[@class='titleHeading']/div[@class='titleLinkAndFootnotes']/a[@class='titleLink']",
+    "section_data" : "//div[@class='section_content content']",
+    "chunks_title" : "//div[@id='childContent']/article/header/div[starts-with(@class, 'contentTitle barTitle sectionTitle')]",
+    "chunks_data": "//div[@id='childContent']/article/div[@class='section_content content']",
+    "clickable_tables" : "//div[@id='childContent']/article[{chunk_count}]/div[@class='section_content content']//div[@class='tableScrollWrapper']",
+    "close_clickable_table" : ".//div[@class='buttonGroup']//button",
+    "dismiss_message" : "//div[@style='']/div/a[@aria-label='dismiss cookie message']",
+    "expanded_table" : "//div[@class='MuiDialogContent-root muiDialogContent ']//div[starts-with(@class, 'codeTable wideTable landTable')]",
+    "refrence_codes": "//span[@class='footnoteref']",
+    "dummy_driver": "//div[@id='dummy']",
+    "attachments": "//div[contains(@class,'attachmentsContainer')]//a[@class='MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways nonxml css-117jj87']",
+    "ordinances": "//*[@id='newLawsTable']/tbody/tr/td[1]/div/span/span/a"
+}
