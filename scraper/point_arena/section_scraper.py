@@ -2,7 +2,7 @@ from selenium.webdriver.common.by import By
 import os
 from scraper.logging_setup import get_logger
 from scraper.exceptions import ScrapperError
-
+from scraper.utils import clean_text
 CITY_NAME = "point_arena"
 FILE_NAME = os.path.basename(__file__)
 logger = get_logger(CITY_NAME)
@@ -24,11 +24,11 @@ def get_sections(driver, xpaths):
 
         for block in section_blocks:
             guid = block.get_attribute("data-guid")
-            full_title = block.get_attribute("data-full-title")
+            full_title =clean_text(block.get_attribute("data-full-title"))
 
             try:
                 body_xpath = f".//following::div[@id='{guid}_content']"
-                body = driver.find_element(By.XPATH, body_xpath).text
+                body = clean_text(driver.find_element(By.XPATH, body_xpath).text)
             except Exception:
                 body = None
                 logger.warning(f"Body not found for section guid {guid}")

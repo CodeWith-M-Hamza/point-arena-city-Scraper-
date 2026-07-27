@@ -13,13 +13,14 @@ CITY_NAME = "point_arena"
 logger = get_logger(CITY_NAME)
 
 TITLE_URL = "https://ecode360.com/42540590"
+# TITLE_URL="https://ecode360.com/42541431"
 
 with open("scraper/xpaths/ecode_xpaths.json", "r") as f:
     xpaths = json.load(f)
 
 
 def run():
-    final_data = {"title": None, "chapters": []}
+    final_data = {"title": None, "chapters": [],"attachments":[],"ordinances":[]}
     driver = create_driver()
 
     try:
@@ -28,6 +29,8 @@ def run():
         dismiss_cookie_popup(driver, xpaths)
         title_page_data = scrape_title_page(driver, xpaths)
         final_data["title"] = title_page_data["title"]
+        final_data["attachments"]=title_page_data["attachments"]
+        final_data["ordinances"]=title_page_data["ordinances"]
 
         # Step 2: Loop through each chapter
         for chapter in title_page_data["chapters"]:

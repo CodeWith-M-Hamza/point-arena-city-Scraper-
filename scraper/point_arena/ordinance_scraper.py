@@ -1,7 +1,7 @@
 from selenium.webdriver.common.by import By
 import os
 from scraper.logging_setup import get_logger
-
+from scraper.utils import clean_text
 CITY_NAME = "point_arena"
 FILE_NAME = os.path.basename(__file__)
 logger = get_logger(CITY_NAME)
@@ -17,9 +17,9 @@ def get_ordinances(driver):
             return ordinances_data
 
         for row in rows:
-            title = row.get_attribute("data-title")
+            title = clean_text(row.get_attribute("data-title"))
             adopted = row.get_attribute("data-adopted")
-            subject = row.get_attribute("data-subject")
+            subject = clean_text(row.get_attribute("data-subject"))
             ordinances_data.append({
                 "title": title,
                 "adopted": adopted,

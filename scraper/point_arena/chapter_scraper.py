@@ -2,7 +2,9 @@ from selenium.webdriver.common.by import By
 import os 
 from scraper.logging_setup import get_logger
 from scraper.exceptions import ScrapperError
-
+from scraper.point_arena.attachment_scraper import get_attachments
+from scraper.point_arena.ordinance_scraper import get_ordinances
+from scraper.utils import clean_text
 CITY_NAME = 'point_arena'
 FILE_NAME = os.path.basename(__file__)
 logger = get_logger(CITY_NAME)
@@ -12,7 +14,7 @@ def get_title(driver, xpaths):
     try:
         prefix = driver.find_element(By.XPATH, xpaths['title_prefix']).text
         suffix = driver.find_element(By.XPATH, xpaths['title_suffix']).text
-        full_title = f"{prefix} : {suffix}"
+        full_title = clean_text(f"{prefix} : {suffix}")
         logger.info(f"Page Title : {full_title}")
         return full_title
     except Exception as e:
@@ -42,7 +44,8 @@ def get_chapters(driver, xpaths):
 
         for chapter in chapters:
             href = chapter.get_attribute("href")
-            title = chapter.text
+            title = clean_text(chapter.text)
+            
             chapters_data.append({"title": title, "url": href})
 
         logger.info(f"Found {len(chapters_data)} chapters using xpath: {matched_xpath}")
@@ -52,8 +55,14 @@ def get_chapters(driver, xpaths):
 
     return chapters_data
 
-
 def scrape_title_page(driver, xpaths):
     title = get_title(driver, xpaths)
     chapters = get_chapters(driver, xpaths)
-    return {"title": title, "chapters": chapters}
+    attachments = get_attachments(driver, xpaths)
+    ordinances = get_ordinances(driver)
+    return {
+        "title": title,
+        "chapters": chapters,
+        "attachments": attachments,
+        "ordinances": ordinances
+    }

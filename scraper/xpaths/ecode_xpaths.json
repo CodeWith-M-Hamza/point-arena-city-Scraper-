@@ -14,7 +14,7 @@
     "chunks_data": "//div[@id='childContent']/article/div[@class='section_content content']",
     "clickable_tables" : "//div[@id='childContent']/article[{chunk_count}]/div[@class='section_content content']//div[@class='tableScrollWrapper']",
     "close_clickable_table" : ".//div[@class='buttonGroup']//button",
-    "dismiss_message" : "//div[@style='']/div/a[@aria-label='dismiss cookie message']",
+    "dismiss_message" : "//button[@class='accept-all st-button st-button--primary']",
     "expanded_table" : "//div[@class='MuiDialogContent-root muiDialogContent ']//div[starts-with(@class, 'codeTable wideTable landTable')]",
     "refrence_codes": "//span[@class='footnoteref']",
     "dummy_driver": "//div[@id='dummy']",

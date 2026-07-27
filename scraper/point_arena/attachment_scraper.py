@@ -1,7 +1,7 @@
 from selenium.webdriver.common.by import By
 import os
 from scraper.logging_setup import get_logger
-
+from scraper.utils import clean_text
 CITY_NAME = "point_arena"
 FILE_NAME = os.path.basename(__file__)
 logger = get_logger(CITY_NAME)
@@ -18,7 +18,7 @@ def get_attachments(driver, xpaths):
             logger.info("No attachments section on this page")
 
         for attachment in attachments:
-            name = attachment.text
+            name = clean_text(attachment.text)
             link = attachment.get_attribute("href")
             attachments_data.append({"name": name, "link": link})
 
