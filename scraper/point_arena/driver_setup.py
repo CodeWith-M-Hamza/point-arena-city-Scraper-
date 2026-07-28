@@ -20,4 +20,5 @@ def create_driver():
             url="N/A",
             xpath="N/A",
             city=CITY_NAME
-        )   
+        )
+        

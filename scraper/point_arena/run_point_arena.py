@@ -44,9 +44,9 @@ def run():
             ordinances = get_ordinances(driver)
 
             # Step 3: For each section, check for clickable tables
-            for index, section in enumerate(sections, start=1):
-                tables = extract_clickable_tables(driver, xpaths, chunk_count=index)
-                section["tables"] = tables
+            # for index, section in enumerate(sections, start=1):
+            #     tables = extract_clickable_tables(driver, xpaths, chunk_count=index)
+            #     section["tables"] = tables
 
             final_data["chapters"].append({
                 "title": chapter["title"],
@@ -71,8 +71,8 @@ def run():
 if __name__ == "__main__":
     result = run()
 
-    os.makedirs("output", exist_ok=True)
-    with open("output/point_arena.json", "w") as f:
-        json.dump(result, f, indent=2)
+    # os.makedirs("output", exist_ok=True)
+    # with open("output/point_arena.json", "w") as f:
+    #     json.dump(result, f, indent=2)
 
-    logger.info("Data saved to output/point_arena.json")
+    # logger.info("Data saved to output/point_arena.json")
