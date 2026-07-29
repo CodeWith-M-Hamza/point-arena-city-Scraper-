@@ -17,43 +17,38 @@ def get_title(driver, xpaths):
         full_title = clean_text(f"{prefix} : {suffix}")
         logger.info(f"Page Title : {full_title}")
         return full_title
-    except Exception as e:
-        logger.warning(f"couldn't extract title : {str(e)}")
+    except Exception:
+        logger.error(
+            f"XPath failed | file: {FILE_NAME} | city: {CITY_NAME} | url: {driver.current_url} | xpath: {xpaths['title_prefix']} / {xpaths['title_suffix']}"
+        )
         return None
 
 
 def get_chapters(driver, xpaths):
     chapters_data = []
-    try:
-        chapters = []
-        matched_xpath = None
-        for xpath_option in xpaths['urls']:
-            chapters = driver.find_elements(By.XPATH, xpath_option)
-            if chapters:
-                matched_xpath = xpath_option
-                break
+    chapters = []
+    matched_xpath = None
 
-        if not chapters:
-            raise ScrapperError(
-                message="No chapters found",
-                file=FILE_NAME,
-                url=driver.current_url,
-                xpath=str(xpaths["urls"]),
-                city=CITY_NAME
-            )
+    for xpath_option in xpaths['urls']:
+        chapters = driver.find_elements(By.XPATH, xpath_option)
+        if chapters:
+            matched_xpath = xpath_option
+            break
 
-        for chapter in chapters:
-            href = chapter.get_attribute("href")
-            title = clean_text(chapter.text)
-            
-            chapters_data.append({"title": title, "url": href})
+    if not chapters:
+        logger.error(
+            f"XPath failed | file: {FILE_NAME} | city: {CITY_NAME} | url: {driver.current_url} | xpath: {xpaths['urls']}"
+        )
+        return chapters_data
 
-        logger.info(f"Found {len(chapters_data)} chapters using xpath: {matched_xpath}")
+    for chapter in chapters:
+        href = chapter.get_attribute("href")
+        title = clean_text(chapter.text)
+        chapters_data.append({"title": title, "url": href})
 
-    except ScrapperError as e:
-        logger.error(f"{e.message} | xpath: {e.xpath} | url:{e.url} ")
-
+    logger.info(f"Found {len(chapters_data)} chapters using xpath: {matched_xpath}")
     return chapters_data
+
 
 def scrape_title_page(driver, xpaths):
     title = get_title(driver, xpaths)

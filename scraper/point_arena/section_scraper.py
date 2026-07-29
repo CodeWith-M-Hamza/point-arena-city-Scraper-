@@ -58,74 +58,62 @@ FILE_NAME = os.path.basename(__file__)
 logger = get_logger(CITY_NAME)
 
 
-def get_sections(driver, xpaths):
-    """
-    Chapter (ya Article/Sub-article) page pe check karta hai:
-    - Agar 'data' xpath se content mile -> seedha sections nikalo (chunks_title/chunks_data)
-    - Agar na mile -> 'urls' xpath se agle level ke links dhoondo, har ek pe navigate + recurse
-    """
+def get_sections(driver, xpaths,depth=0,max_depth=6,visited=None):
     sections_data = []
+    if visited is None:
+        visited=set()
     current_url = driver.current_url
+    if current_url in visited:
+        return []
+    visited.add(current_url)
+    if depth > max_depth:
+        logger.error(f"Max recursion depth reached | file: {FILE_NAME} | city: {CITY_NAME} | url: {current_url}")
 
-    try:
-        content_present = driver.find_elements(By.XPATH, xpaths['data'])
+    content_present = driver.find_elements(By.XPATH, xpaths['data'])
 
-        if content_present:
-            # Content isi page pe hai -> seedha titles + bodies nikalo
-            titles = driver.find_elements(By.XPATH, xpaths['chunks_title'])
-            bodies = driver.find_elements(By.XPATH, xpaths['chunks_data'])
+    if content_present:
+        titles = driver.find_elements(By.XPATH, xpaths['chunks_title'])
+        bodies = driver.find_elements(By.XPATH, xpaths['chunks_data'])
 
-            if not titles:
-                raise ScrapperError(
-                    message="Content present but no section titles found",
-                    file=FILE_NAME,
-                    url=current_url,
-                    xpath=xpaths['chunks_title'],
-                    city=CITY_NAME
+        if not titles:
+            logger.error(
+                f"XPath failed | file: {FILE_NAME} | city: {CITY_NAME} | url: {current_url} | xpath: {xpaths['chunks_title']}"
+            )
+            return sections_data
+
+        for i, title_el in enumerate(titles):
+            title = clean_text(title_el.text)
+            body = clean_text(bodies[i].text) if i < len(bodies) else None
+            sections_data.append({"title": title, "url": current_url, "body": body})
+
+    else:
+        next_urls_elements = driver.find_elements(By.XPATH, xpaths['urls'][0])
+        if not next_urls_elements:
+            next_urls_elements = driver.find_elements(By.XPATH, xpaths['urls'][1])
+        if not next_urls_elements:
+            next_urls_elements = driver.find_elements(By.XPATH, xpaths['urls'][2])
+
+        if not next_urls_elements:
+            logger.error(
+                f"XPath failed | file: {FILE_NAME} | city: {CITY_NAME} | url: {current_url} | xpath: {xpaths['urls']}"
+            )
+            return sections_data
+
+        # next_urls = [el.get_attribute("href") for el in next_urls_elements]
+        next_urls = list(set(el.get_attribute("href") for el in next_urls_elements))
+
+        for next_url in next_urls:
+            try:
+                driver.get(next_url)
+                WebDriverWait(driver, 5).until(
+                    EC.presence_of_element_located((By.XPATH, xpaths['data']))
                 )
+            except Exception:
+                pass
 
-            for i, title_el in enumerate(titles):
-                title = clean_text(title_el.text)
-                body = clean_text(bodies[i].text) if i < len(bodies) else None
-                sections_data.append({"title": title, "url": current_url, "body": body})
+            child_sections = get_sections(driver, xpaths,depth=depth+1,max_depth=max_depth)
+            sections_data.extend(child_sections)
+            driver.get(current_url)
 
-        else:
-            # Content nahi mila -> ye ek index/listing page hai, agle level ke links dhoondo
-            next_urls_elements = driver.find_elements(By.XPATH, xpaths['urls'][0])
-            if not next_urls_elements:
-                next_urls_elements = driver.find_elements(By.XPATH, xpaths['urls'][1])
-            if not next_urls_elements:
-                next_urls_elements = driver.find_elements(By.XPATH, xpaths['urls'][2])
-
-            if not next_urls_elements:
-                raise ScrapperError(
-                    message="No content and no next-level urls found",
-                    file=FILE_NAME,
-                    url=current_url,
-                    xpath=str(xpaths['urls']),
-                    city=CITY_NAME
-                )
-
-            next_urls = [el.get_attribute("href") for el in next_urls_elements]
-
-            for next_url in next_urls:
-                try:
-                    driver.get(next_url)
-                    WebDriverWait(driver, 10).until(
-                        EC.presence_of_element_located((By.XPATH, xpaths['data']))
-                    )
-                except Exception:
-                    pass  # agar wait timeout ho, aage recursive call khud check kar lega
-
-                # RECURSION: isi function ko dobara call karo naye page ke liye
-                child_sections = get_sections(driver, xpaths)
-                sections_data.extend(child_sections)
-
-                driver.get(current_url)  # wapas is (parent) level pe aao, agla next_url process karne ke liye
-
-        logger.info(f"Found {len(sections_data)} sections on/under {current_url}")
-
-    except ScrapperError as e:
-        logger.error(f"{e.message} | xpath: {e.xpath} | url: {e.url}")
-
+    logger.info(f"Found {len(sections_data)} sections on/under {current_url}")
     return sections_data

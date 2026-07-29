@@ -10,7 +10,7 @@ def get_logger(city_name):
         log_path = os.path.join(log_folder, f"{city_name}.log")
 
         file_handler = logging.FileHandler(log_path)
-        file_handler.setLevel(logging.INFO)   # NAYA: file mein sirf ERROR+
+        file_handler.setLevel(logging.ERROR)   # NAYA: file mein sirf ERROR+
 
         console_handler = logging.StreamHandler()
         console_handler.setLevel(logging.DEBUG)  # console pe sab kuch
