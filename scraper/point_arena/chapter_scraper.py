@@ -1,27 +1,28 @@
 from selenium.webdriver.common.by import By
-import os 
+import os
 from scraper.logging_setup import get_logger
-from scraper.exceptions import ScrapperError
 from scraper.point_arena.attachment_scraper import get_attachments
 from scraper.point_arena.ordinance_scraper import get_ordinances
 from scraper.utils import clean_text
+
 CITY_NAME = 'point_arena'
 FILE_NAME = os.path.basename(__file__)
 logger = get_logger(CITY_NAME)
 
 
 def get_title(driver, xpaths):
-    try:
-        prefix = driver.find_element(By.XPATH, xpaths['title_prefix']).text
-        suffix = driver.find_element(By.XPATH, xpaths['title_suffix']).text
-        full_title = clean_text(f"{prefix} : {suffix}")
-        logger.info(f"Page Title : {full_title}")
-        return full_title
-    except Exception:
+    prefix_els = driver.find_elements(By.XPATH, xpaths['title_prefix'])
+    suffix_els = driver.find_elements(By.XPATH, xpaths['title_suffix'])
+
+    if not prefix_els or not suffix_els:
         logger.error(
-            f"XPath failed | file: {FILE_NAME} | city: {CITY_NAME} | url: {driver.current_url} | xpath: {xpaths['title_prefix']} / {xpaths['title_suffix']}"
+            f"Title xpath failed | file={FILE_NAME} | url={driver.current_url} | xpath={xpaths['title_prefix']} / {xpaths['title_suffix']}"
         )
         return None
+
+    full_title = clean_text(f"{prefix_els[0].text} : {suffix_els[0].text}")
+    logger.info(f"Page Title : {full_title}")
+    return full_title
 
 
 def get_chapters(driver, xpaths):
@@ -37,7 +38,7 @@ def get_chapters(driver, xpaths):
 
     if not chapters:
         logger.error(
-            f"XPath failed | file: {FILE_NAME} | city: {CITY_NAME} | url: {driver.current_url} | xpath: {xpaths['urls']}"
+            f"All chapter xpath variants failed | file={FILE_NAME} | url={driver.current_url} | xpaths={xpaths['urls']}"
         )
         return chapters_data
 
@@ -51,13 +52,9 @@ def get_chapters(driver, xpaths):
 
 
 def scrape_title_page(driver, xpaths):
-    title = get_title(driver, xpaths)
-    chapters = get_chapters(driver, xpaths)
-    attachments = get_attachments(driver, xpaths)
-    ordinances = get_ordinances(driver)
     return {
-        "title": title,
-        "chapters": chapters,
-        "attachments": attachments,
-        "ordinances": ordinances
+        "title": get_title(driver, xpaths),
+        "chapters": get_chapters(driver, xpaths),
+        "attachments": get_attachments(driver, xpaths),
+        "ordinances": get_ordinances(driver,xpaths),
     }

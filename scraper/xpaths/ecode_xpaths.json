@@ -14,10 +14,12 @@
     "chunks_data": "//div[@id='childContent']/article/div[@class='section_content content']",
     "clickable_tables" : "//div[@id='childContent']/article[{chunk_count}]/div[@class='section_content content']//div[@class='tableScrollWrapper']",
     "close_clickable_table" : ".//div[@class='buttonGroup']//button",
-    "dismiss_message" : "//button[@class='accept-all st-button st-button--primary']",
+    "dismiss_message" : "//button[@classs='Accept-all st-button st-button--primary']",
     "expanded_table" : "//div[@class='MuiDialogContent-root muiDialogContent ']//div[starts-with(@class, 'codeTable wideTable landTable')]",
     "refrence_codes": "//span[@class='footnoteref']",
     "dummy_driver": "//div[@id='dummy']",
     "attachments": "//div[contains(@class,'attachmentsContainer')]//a[@class='MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways nonxml css-117jj87']",
-    "ordinances": "//*[@id='newLawsTable']/tbody/tr/td[1]/div/span/span/a"
+    "ordinances": "//*[@id='newLawsTable']/tbody/tr/td[1]/div/span/span/a",
+    "attachments_section": "//div[@class='attachmentsTitle']",
+    "ordinance_rows": "//table[@id='newLawsTable']/tbody/tr"
 }

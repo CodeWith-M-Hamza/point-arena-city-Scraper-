@@ -11,35 +11,48 @@ logger = get_logger(CITY_NAME)
 
 def extract_clickable_tables(driver, xpaths, chunk_count):
     tables_data = []
-    try:
-        xpath = xpaths["clickable_tables"].format(chunk_count=chunk_count)
-        tables = driver.find_elements(By.XPATH, xpath)
 
-        if not tables:
-            return tables_data
+    xpath = xpaths["clickable_tables"].format(chunk_count=chunk_count)
+    tables = driver.find_elements(By.XPATH, xpath)
 
-        for table in tables:
-            driver.execute_script("arguments[0].scrollIntoView(true);", table)
+    if not tables:
+        return tables_data
+
+    for table in tables:
+        driver.execute_script("arguments[0].scrollIntoView(true);", table)
+
+        try:
             table.click()
+        except Exception as e:
+            logger.error(f"Table click failed | url={driver.current_url} | error={e}")
+            continue
 
-            wait = WebDriverWait(driver, 5)
-            expanded = wait.until(
+        try:
+            expanded = WebDriverWait(driver, 5).until(
                 EC.visibility_of_element_located((By.XPATH, xpaths["expanded_table"]))
             )
+        except Exception as e:
+            logger.error(
+                f"Expanded table did not appear | url={driver.current_url} | xpath={xpaths['expanded_table']} | error={e}"
+            )
+            continue
 
-            table_text = expanded.text
-            tables_data.append(table_text)
+        tables_data.append(expanded.text)
 
-            close_button = expanded.find_element(By.XPATH, xpaths["close_clickable_table"])
-            close_button.click()
+        close_buttons = expanded.find_elements(By.XPATH, xpaths["close_clickable_table"])
+        if not close_buttons:
+            logger.error(
+                f"Close button not found | url={driver.current_url} | xpath={xpaths['close_clickable_table']}"
+            )
+            continue
 
-            wait.until(
+        try:
+            close_buttons[0].click()
+            WebDriverWait(driver, 5).until(
                 EC.invisibility_of_element_located((By.XPATH, xpaths["expanded_table"]))
             )
+        except Exception as e:
+            logger.error(f"Table close failed | url={driver.current_url} | error={e}")
 
-        logger.info(f"Extracted {len(tables_data)} tables")
-
-    except Exception as e:
-        logger.warning(f"Issue while extracting clickable tables: {str(e)}")
-
+    logger.info(f"Extracted {len(tables_data)} tables")
     return tables_data

@@ -2,34 +2,36 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
-import os 
+import os
 from scraper.logging_setup import get_logger
-from scraper.exceptions import ScrapperError
-CITY_NAME='point_arena'
+
+CITY_NAME = 'point_arena'
 FILE_NAME = os.path.basename(__file__)
-logger=get_logger(CITY_NAME)
-def open_page(driver,url):
+logger = get_logger(CITY_NAME)
+
+
+def open_page(driver, url):
     try:
         driver.get(url)
         logger.info(f"Opened URL: {url}")
     except Exception as e:
-        raise ScrapperError(
-            message=f"failed to open url:{str(e)}",
-            file=FILE_NAME,
-            url=url,
-            xpath='N/A',
-            city=CITY_NAME
-        )
-def dismiss_cookie_popup(driver,xpaths):
-    try:
-        wait=WebDriverWait(driver,5)
-        cookie_button=wait.until(
-            EC.element_to_be_clickable((By.XPATH,xpaths['dismiss_message']))
+        logger.error(f"Failed to open url | file={FILE_NAME} | url={url} | error={e}")
 
+
+def dismiss_cookie_popup(driver, xpaths):
+    cookie_buttons = driver.find_elements(By.XPATH, xpaths['dismiss_message'])
+
+    if not cookie_buttons:
+        logger.error(f"No cookie popup found | url={driver.current_url} | xapth={xpaths['dismiss_message']}")
+        return
+
+    try:
+        WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.XPATH, xpaths['dismiss_message']))
         )
-        cookie_button.click()
-        logger.info("cookie popup dismissed")
-    except TimeoutException:
-        logger.info("No popup appeared")
+        cookie_buttons[0].click()
+        logger.info("Cookie popup dismissed")
     except Exception as e:
-        logger.warning("cookie popup issue {str(e)}")
+        logger.error(
+            f"Cookie popup found but click failed | url={driver.current_url} | xpath={xpaths['dismiss_message']} | error={e}"
+        )
